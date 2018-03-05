@@ -24,12 +24,10 @@ func main() {
 		}
 	}
 
-	// Sort customersWithin100KM of dublinOffice by UserID (ascending)
 	sort.Slice(customersWithin100KM[:], func(i, j int) bool {
 		return customersWithin100KM[i].UserID < customersWithin100KM[j].UserID
 	})
 
-	// Output the Names and UserIDs of customersWithin100KM
 	for _, customer := range customersWithin100KM {
 		fmt.Printf("%d\t %s\n", customer.UserID, customer.Name)
 	}
