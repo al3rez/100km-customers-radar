@@ -2,24 +2,24 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
-	"math"
+	"os"
 	"sort"
 
-	"github.com/azbshiri/invite-customers-within-100km/customer"
-	geo "github.com/kellydunn/golang-geo"
+	"github.com/azbshiri/100km-customers-radar/intercom"
+	"github.com/azbshiri/100km-customers-radar/internal/json"
 )
 
 func main() {
-	allCustomers := customer.NewCustomerSlice()
-	data, _ := ioutil.ReadFile("customers.jsonl")
-	customer.Unmarshal(data, &allCustomers)
+	customers := []intercom.Customer{}
+	r, _ := os.Open("customers.jsonl")
+	decoder := json.NewCustomerDecoder(r)
+	decoder.Decode(&customers)
 
-	dublinOffice := geo.NewPoint(53.339428, -6.257664)
-	customersWithin100KM := customer.NewCustomerSlice()
-	for _, customer := range allCustomers {
-		distance := distanceBetween(dublinOffice, customer.CalcPoint())
-		if (distance >= 0) && (distance <= 100) {
+	dublinOffice := intercom.NewOffice("Dublin", 53.339428, -6.257664)
+	customersWithin100KM := []intercom.Customer{}
+	for _, customer := range customers {
+		distance := intercom.DistanceBetween(&dublinOffice, &customer)
+		if distance <= 100 {
 			customersWithin100KM = append(customersWithin100KM, customer)
 		}
 	}
@@ -31,8 +31,4 @@ func main() {
 	for _, customer := range customersWithin100KM {
 		fmt.Printf("%d\t %s\n", customer.UserID, customer.Name)
 	}
-}
-
-func distanceBetween(p1, p2 *geo.Point) float64 {
-	return math.Round(p1.GreatCircleDistance(p2))
 }
